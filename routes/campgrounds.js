@@ -3,6 +3,8 @@
 const express = require("express");
 const router = express.Router();
 
+const { storage } = require("../cloudinary");
+
 // Controllers for Campgrounds
 const campgroundController = require("../controllers/campgroundController");
 
@@ -11,6 +13,10 @@ const catchAsync = require("../utils/catchAsync");
 
 // Auth middleware
 const { isLoggedIn, isCampAuthor } = require("../middleware/auth");
+
+// Middleware to parse multipart encoded forms
+const multer = require("multer");
+const upload = multer({ storage });
 
 // JOI Validation Middleware
 const { validateCampground } = require("../middleware/JoiValidation");
@@ -23,9 +29,11 @@ router.route("/")
     // Create a new Campground
     .post(
         // check if user is logged-in
-        isLoggedIn, 
+        isLoggedIn,  
+        // upload image/images to cloudinary
+        upload.array("images"),
         // use JOI to vaidate data
-        validateCampground, 
+        validateCampground,
         // create campground
         catchAsync(campgroundController.createCampground)
     );
@@ -50,6 +58,8 @@ router.route("/:id")
         isLoggedIn, 
         // check is user is the author
         isCampAuthor, 
+        // upload image/images to cloudinary
+        upload.array("images"),
         // use JOI to vaidate data
         validateCampground, 
         // update campground
