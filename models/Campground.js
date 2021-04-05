@@ -9,14 +9,28 @@ const ImageSchema = new Schema({
     filename: String,
 });
 
-// mongoose virtual
+// mongoose virtual for thumbnails
 ImageSchema.virtual("thumbnail").get(function () {
     return this.url.replace("/upload", "/upload/w_200");
 });
 
+
+const opts = { toJSON: { virtuals: true } };
+
 const campgroundSchema = new Schema({
     title: String,
     images: [ImageSchema],
+    geometry: {
+        type: {
+            type: String,
+            enum: ["Point"],
+            required: true,
+        },
+        coordinates: {
+            type: [Number],
+            required: true,
+        },
+    },
     price: Number,
     description: String,
     location: String,
@@ -32,6 +46,14 @@ const campgroundSchema = new Schema({
             ref: "Review"
         },
     ],
+}, opts);
+
+// mongoose virtual for pop-up HTML on cluster map
+// to conform to geoJSON 'properties' fiels
+campgroundSchema.virtual("properties.popUpMarkup").get(function() {
+    return `
+    <strong><a href="/campgrounds/${this._id}">${this.title}</a></strong>
+    <p>${this.description.substring(0, 30)}...</p>`;
 });
 
 // when a campground is deleted, delete all assoiated reviews

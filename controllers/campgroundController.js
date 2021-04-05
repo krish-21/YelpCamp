@@ -6,6 +6,11 @@ const Campground = require("../models/Campground");
 // cloudinary
 const { cloudinary } = require("../cloudinary");
 
+// mapbox setup
+const mbxGeocoding = require("@mapbox/mapbox-sdk/services/geocoding");
+const mapBoxToken = process.env.MAPBOX_TOKEN;
+const geoCoder = mbxGeocoding({ accessToken: mapBoxToken });
+
 // renders the index page (all campgrounds)
 module.exports.index = async (req, res) => {
     // query db
@@ -29,6 +34,14 @@ module.exports.createCampground = async (req, res, next) => {
     // add the images to campground
     // images exist in 'req.files', added by multer
     campground.images = req.files.map(f => ({ url: f.path, filename: f.filename }));
+    // get data using MapBox API
+    // returns GeoJSON
+    const geoData = await geoCoder.forwardGeocode({
+        query: req.body.campground.location,
+        limit: 1
+    }).send();
+    // add coordinates to campground
+    campground.geometry = geoData.body.features[0].geometry;
     // add the author as logged-in user
     campground.author = req.user._id;
     

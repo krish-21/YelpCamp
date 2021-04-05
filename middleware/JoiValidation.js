@@ -13,7 +13,7 @@ module.exports.validateCampground = (req, res, next) => {
     // if data invalid, throw error
     if (error) {
         const message = error.details.map(err => err.message).join(",");
-        throw new ExpressError(400, message);
+        throw new ExpressError(400, message + "JOI");
     } else {
         // if data valid, continue
         next();
