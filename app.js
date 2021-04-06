@@ -13,11 +13,17 @@ const flash = require("connect-flash");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
 
+// Use MongoDB as Session Storage instead of Memory
+const MongoStore = require("connect-mongo");
+
 // Security
 // Sanitize for Mongo Injections
 const mongoSanitize = require("express-mongo-sanitize");
 // Setting HTTP Headers for Security
 const helmet = require("helmet");
+
+// Mongo Atlast DB
+const dbUrl = process.env.DB_URL || "mongodb://localhost:27017/yelpCamp";
 
 // Models
 const User = require("./models/User");
@@ -33,7 +39,7 @@ const reviewRoutes = require("./routes/reviews");
 const ExpressError = require("./utils/ExpressError");
 
 // DB Connection
-mongoose.connect("mongodb://localhost:27017/yelpCamp", {
+mongoose.connect(dbUrl, {
     useNewUrlParser: true,
     useCreateIndex: true,
     useUnifiedTopology: true,
@@ -66,16 +72,31 @@ app.use(mongoSanitize({
     replaceWith: "_"
 }));
 
+const secret = process.env.SECRET || 'thisshouldbeabettersecret!';
+
+const store = MongoStore.create({
+    mongoUrl: dbUrl,
+    touchAfter: 24 * 60 * 60,   // in seconds
+    crypto: {
+        secret,
+    }
+});
+
+store.on("error", function (e) {
+    console.log("Session Store Error!", e);
+});
+
 // set up express session
 const sessionConfig = {
+    store,
     name: "session",
-    secret: "thisshouldbeabettersecret",
+    secret,
     resave: false,
     saveUninitialized: true,
     cookie: {
         httpOnly: true,
         // secure: true,
-        expires: Date.now() + (1000 * 60 * 60 * 24 * 7),
+        expires: Date.now() + (1000 * 60 * 60 * 24 * 7),    // in milliseconds
         maxAge: 1000 * 60 * 60 * 24 * 7,
     },
 }
