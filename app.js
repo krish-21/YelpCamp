@@ -171,6 +171,11 @@ passport.deserializeUser(User.deserializeUser());
 
 // make flash available as a local variable in templates without passing it explicitly
 app.use((req, res, next) => {
+    // if not coming from login or homepage
+    if (!["/register", "/login", "/"].includes(req.originalUrl)) {
+        // set returnToUrl after login
+        req.session.returnTo = req.originalUrl;
+    }
     res.locals.currentUser = req.user;
     res.locals.success = req.flash("success");
     res.locals.error = req.flash("error");

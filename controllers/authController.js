@@ -5,6 +5,10 @@ const User = require("../models/User");
 
 // renders the registration form
 module.exports.renderRegisterForm = (req, res) => {
+    // is user is already login, redirect to index
+    if (req.isAuthenticated()) {
+        return res.redirect("/campgrounds");
+    }
     // render new empty form
     res.render("auth/register");
 };
@@ -45,6 +49,10 @@ module.exports.register = async (req, res) => {
 
 // renders the login form
 module.exports.renderLoginForm = (req, res) => {
+    // is user is already login, redirect to index
+    if (req.isAuthenticated()) {
+        return res.redirect("/campgrounds");
+    }
     // render empty login form
     res.render("auth/login");
 };
@@ -55,9 +63,6 @@ module.exports.afterLogin = (req, res) => {
     // set redirect url to session variable
     // or default to index
     const redirectUrl = req.session.returnTo || "/campgrounds";
-    
-    // clear session variable
-    delete req.session.returnTo;
     
     // set success flash message
     req.flash("success", "Welcome back!");

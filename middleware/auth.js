@@ -10,10 +10,7 @@ const catchAsync = require("../utils/catchAsync")
 // checks if user is logged-in
 module.exports.isLoggedIn = (req, res, next) => {
     // use passport to check if user is logged-in
-    if(!req.isAuthenticated()) {
-        // set returnToUrl after login
-        req.session.returnTo = req.originalUrl;
-    
+    if(!req.isAuthenticated()) {    
         // set error flash message
         req.flash("error", "You must be signed in!");
     
