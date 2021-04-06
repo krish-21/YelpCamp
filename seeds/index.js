@@ -1,5 +1,9 @@
 // Script to Seed Database
 
+if (process.env.NODE_ENV !== "production") {
+    require("dotenv").config();
+}
+
 const mongoose = require("mongoose");
 
 // Models
@@ -9,8 +13,11 @@ const Campground = require("../models/campground");
 const cities = require("./cities");
 const { places, descriptors } = require("./seedHelpers");
 
+// Mongo Atlast DB
+const dbUrl = process.env.DB_URL || "mongodb://localhost:27017/yelpCamp";
+
 // DB Connection
-mongoose.connect("mongodb://localhost:27017/yelpCamp", {
+mongoose.connect(dbUrl, {
     useNewUrlParser: true,
     useCreateIndex: true,
     useUnifiedTopology: true,
@@ -34,7 +41,7 @@ const seedDB = async () => {
         const random1000 = Math.floor(Math.random() * 1000);
         const randPrice = Math.floor(Math.random() * 20 + 10);
         const camp = new Campground({
-            author: "6066a38c2b83aa51da5d6724",
+            author: "606becba491d9193b63d3362",
             location: `${cities[random1000].city}, ${cities[random1000].state}`,
             title: `${sample(descriptors)} ${sample(places)}`,
             description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Aspernatur nulla nam sint laborum ex consequatur suscipit, officia cupiditate non, corporis repudiandae vitae aperiam incidunt beatae voluptatibus veniam dolorem sunt eius.",
